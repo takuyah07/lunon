@@ -1,6 +1,10 @@
 /**
  * /legal/privacy - プライバシーポリシーページ
+ * 完全静的生成（超高速）
  */
+
+// 完全静的生成を強制
+export const dynamic = 'force-static';
 
 export default function PrivacyPage() {
   return (
