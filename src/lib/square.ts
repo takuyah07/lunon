@@ -6,7 +6,7 @@
  * NOTE: Webhook連動・返金処理はPhase2以降
  */
 
-import { Client } from "square";
+import { SquareClient } from "square";
 
 // DRY RUNモード（テスト用）
 // SQUARE_DRY_RUN=true または Square環境変数が未設定の場合に有効
@@ -36,9 +36,9 @@ if (IS_DRY_RUN) {
  */
 export const squareClient = IS_DRY_RUN 
   ? null 
-  : new Client({
-      accessToken: SQUARE_ACCESS_TOKEN,
-      environment: SQUARE_ENV as "production" | "sandbox",
+  : new SquareClient({
+      token: SQUARE_ACCESS_TOKEN,
+      environment: SQUARE_ENV,
     });
 
 /**
@@ -62,7 +62,7 @@ export async function createCheckoutUrl(
   }
 
   try {
-    const { result } = await squareClient.checkoutApi.createPaymentLink({
+    const response = await squareClient.checkout.paymentLinks.create({
       idempotencyKey: `${catalogItemId}-${Date.now()}`,
       quickPay: {
         name: "ギフト",
@@ -90,11 +90,11 @@ export async function createCheckoutUrl(
       },
     });
 
-    if (!result.paymentLink?.url) {
+    if (!response.paymentLink?.url) {
       throw new Error("Checkout URL generation failed");
     }
 
-    return result.paymentLink.url;
+    return response.paymentLink.url;
   } catch (error: unknown) {
     console.error("Checkout creation error:", error);
     throw new Error("Failed to create checkout URL");
@@ -130,32 +130,29 @@ export async function listPayments(
   }
 
   try {
-    const { result } = await squareClient.paymentsApi.listPayments(
+    const paymentsPage = await squareClient.payments.list({
       beginTime,
       endTime,
-      undefined, // sortOrder
-      undefined, // cursor
-      SQUARE_LOCATION_ID
-    );
+      locationId: SQUARE_LOCATION_ID,
+    });
 
-    if (!result.payments) {
-      return [];
+    const payments = [];
+    for await (const payment of paymentsPage) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((payment as any).status === "COMPLETED") {
+        payments.push({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          id: (payment as any).id!,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          amount: (payment as any).amountMoney?.amount || BigInt(0),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          createdAt: (payment as any).createdAt!,
+          lineItems: [],
+        });
+      }
     }
 
-    return (
-      result.payments
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((p: any) => p.status === "COMPLETED") // 成功した決済のみ
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .map((payment: any) => ({
-        id: payment.id!,
-        amount: payment.amountMoney?.amount || BigInt(0),
-        createdAt: payment.createdAt!,
-          lineItems: payment.orderId 
-            ? [] // 注文詳細は別途取得が必要（簡易版ではスキップ）
-            : [],
-        }))
-    );
+    return payments;
   } catch (error: unknown) {
     console.error("ListPayments error:", error);
     // エラー時は空配列を返す（MVPではスキップ）
@@ -180,8 +177,8 @@ export async function getOrder(orderId: string) {
   }
 
   try {
-    const { result } = await squareClient.ordersApi.retrieveOrder(orderId);
-    return result.order || null;
+    const response = await squareClient.orders.get({ orderId });
+    return response.order || null;
   } catch (error: unknown) {
     console.error("GetOrder error:", error);
     return null;

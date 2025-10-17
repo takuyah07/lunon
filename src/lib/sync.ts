@@ -116,9 +116,14 @@ export async function syncPaymentsFromSquare(
  * Order詳細（LineItems含む）を取得
  */
 async function getOrderWithLineItems(paymentId: string) {
+  if (!squareClient) {
+    console.error("Square client not initialized");
+    return null;
+  }
+
   try {
-    const { result } = await squareClient.paymentsApi.getPayment(paymentId);
-    const orderId = result.payment?.orderId;
+    const response = await squareClient.payments.get({ paymentId });
+    const orderId = response.payment?.orderId;
     
     if (!orderId) return null;
 
