@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  addressText String?
+  hoursText   String?
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  oshis       Oshi[]
+  payments    Payment[]
+}
+
+model Oshi {
+  id           String              @id @default(cuid())
+  storeId      String
+  store        Store               @relation(fields: [storeId], references: [id])
+  name         String
+  slug         String              @unique
+  profileShort String?
+  photoUrl     String?
+  isActive     Boolean             @default(true)
+  createdAt    DateTime            @default(now())
+  presets      GiftPreset[]
+  payments     Payment[]
+  rankCache    MonthlyRankCache[]
+}
+
+model GiftPreset {
+  id                  String  @id @default(cuid())
+  oshiId              String
+  oshi                Oshi    @relation(fields: [oshiId], references: [id])
+  label               String
+  amount              Int
+  squareCatalogItemId String
+  isActive            Boolean @default(true)
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  squarePaymentId String  @unique
+  oshiId         String
+  oshi           Oshi     @relation(fields: [oshiId], references: [id])
+  storeId        String
+  store          Store    @relation(fields: [storeId], references: [id])
+  amount         Int
+  paidAtJst      DateTime
+  createdAt      DateTime @default(now())
+}
+
+model MonthlyRankCache {
+  id          String   @id @default(cuid())
+  storeId     String
+  oshiId      String
+  oshi        Oshi     @relation(fields: [oshiId], references: [id])
+  totalAmount Int
+  monthYm     String
+  refreshedAt DateTime @default(now())
+
+  @@unique([storeId, oshiId, monthYm])
+}
