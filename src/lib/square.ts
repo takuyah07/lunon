@@ -6,7 +6,7 @@
  * NOTE: Webhook連動・返金処理はPhase2以降
  */
 
-import { SquareClient } from "square";
+import { SquareClient, SquareEnvironment } from "square";
 
 // DRY RUNモード（テスト用）
 // SQUARE_DRY_RUN=true または Square環境変数が未設定の場合に有効
@@ -44,7 +44,9 @@ export const squareClient = IS_DRY_RUN
   ? null 
   : new SquareClient({
       token: SQUARE_ACCESS_TOKEN,
-      environment: process.env.SQUARE_ENV === "production" ? "production" : "sandbox",
+      environment: process.env.SQUARE_ENV === "production" 
+        ? SquareEnvironment.Production 
+        : SquareEnvironment.Sandbox,
     });
 
 /**
