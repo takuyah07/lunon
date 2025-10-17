@@ -142,18 +142,20 @@ export async function listPayments(
       return [];
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return result.payments
-      .filter((p: any) => p.status === "COMPLETED") // 成功した決済のみ
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((payment: any) => ({
+    return (
+      result.payments
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((p: any) => p.status === "COMPLETED") // 成功した決済のみ
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((payment: any) => ({
         id: payment.id!,
         amount: payment.amountMoney?.amount || BigInt(0),
         createdAt: payment.createdAt!,
-        lineItems: payment.orderId 
-          ? [] // 注文詳細は別途取得が必要（簡易版ではスキップ）
-          : [],
-      }));
+          lineItems: payment.orderId 
+            ? [] // 注文詳細は別途取得が必要（簡易版ではスキップ）
+            : [],
+        }))
+    );
   } catch (error: unknown) {
     console.error("ListPayments error:", error);
     // エラー時は空配列を返す（MVPではスキップ）
