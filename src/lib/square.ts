@@ -83,6 +83,15 @@ export async function createCheckoutUrl(
       },
       checkoutOptions: {
         redirectUrl: `${SITE_URL}/stores`,
+        askForShippingAddress: false,
+        allowTipping: false,
+        // メールアドレスを必須にしてBuyer Accountsを有効化
+        // これによりSquareが自動的にカード情報を保存
+        merchantSupportEmail: undefined,
+      },
+      prePopulatedData: {
+        // メールアドレスの収集を促す
+        buyerEmail: undefined,
       },
     });
 
