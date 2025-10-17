@@ -21,20 +21,10 @@ const SQUARE_LOCATION_ID = process.env.SQUARE_LOCATION_ID || "dummy_location";
 const SQUARE_APPLICATION_ID = process.env.SQUARE_APPLICATION_ID || "dummy_app_id";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-// DRY RUNモードの場合は警告を表示
-if (IS_DRY_RUN) {
+// DRY RUNモードの場合は警告を表示（開発環境のみ）
+if (IS_DRY_RUN && process.env.NODE_ENV === "development") {
   console.warn("[Square] DRY RUN mode enabled - Square API calls will be skipped");
 }
-
-// デバッグ情報を出力
-console.log("[Square] Configuration:", {
-  isDryRun: IS_DRY_RUN,
-  environment: process.env.SQUARE_ENV,
-  hasAccessToken: !!process.env.SQUARE_ACCESS_TOKEN,
-  accessTokenPrefix: process.env.SQUARE_ACCESS_TOKEN?.substring(0, 6),
-  locationId: SQUARE_LOCATION_ID,
-  applicationId: SQUARE_APPLICATION_ID,
-});
 
 /**
  * Squareクライアントのシングルトンインスタンス

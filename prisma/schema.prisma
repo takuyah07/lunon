@@ -55,6 +55,9 @@ model Payment {
   amount         Int
   paidAtJst      DateTime
   createdAt      DateTime @default(now())
+
+  @@index([storeId, paidAtJst])
+  @@index([oshiId, paidAtJst])
 }
 
 model MonthlyRankCache {
@@ -67,4 +70,5 @@ model MonthlyRankCache {
   refreshedAt DateTime @default(now())
 
   @@unique([storeId, oshiId, monthYm])
+  @@index([storeId, monthYm, totalAmount])
 }
