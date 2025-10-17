@@ -16,10 +16,6 @@ export const IS_DRY_RUN =
   !process.env.SQUARE_LOCATION_ID ||
   !process.env.SQUARE_APPLICATION_ID;
 
-const SQUARE_ENV = process.env.SQUARE_ENV === "production" 
-  ? "production" 
-  : "sandbox";
-
 const SQUARE_ACCESS_TOKEN = process.env.SQUARE_ACCESS_TOKEN || "dummy_token";
 const SQUARE_LOCATION_ID = process.env.SQUARE_LOCATION_ID || "dummy_location";
 const SQUARE_APPLICATION_ID = process.env.SQUARE_APPLICATION_ID || "dummy_app_id";
@@ -38,7 +34,7 @@ export const squareClient = IS_DRY_RUN
   ? null 
   : new SquareClient({
       token: SQUARE_ACCESS_TOKEN,
-      environment: SQUARE_ENV,
+      environment: process.env.SQUARE_ENV === "production" ? "production" : "sandbox",
     });
 
 /**
