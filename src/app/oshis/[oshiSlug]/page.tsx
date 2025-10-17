@@ -21,7 +21,7 @@ interface OshiPageProps {
   };
 }
 
-interface PresetData {
+interface TemplateData {
   id: string;
   label: string;
   amount: number;
@@ -146,7 +146,7 @@ export default async function OshiPage({ params }: OshiPageProps) {
               
               return (
                 <div className="space-y-3">
-                  {templates.map((template: any) => (
+                  {templates.map((template: TemplateData) => (
                     <GiftButton
                       key={template.id}
                       oshiId={oshi.id}
