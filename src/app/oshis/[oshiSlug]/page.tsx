@@ -1,12 +1,19 @@
 /**
  * /oshis/[oshiSlug] - 推し詳細ページ
  * 写真・プロフィール + ギフトプリセットボタン
+ * 
+ * パフォーマンス最適化:
+ * - ISR: 5分毎に再検証
+ * - 静的生成: ビルド時に全推しページを生成
  */
 
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { prisma } from "@/lib/db";
 import GiftButton from "@/components/GiftButton";
+
+// ISR: 5分毎に再検証
+export const revalidate = 300;
 
 interface OshiPageProps {
   params: {
@@ -33,6 +40,18 @@ async function getOshiData(slug: string) {
   });
 
   return oshi;
+}
+
+// 静的パス生成: 全推しページをビルド時に生成
+export async function generateStaticParams() {
+  const oshis = await prisma.oshi.findMany({
+    where: { isActive: true },
+    select: { slug: true },
+  });
+
+  return oshis.map((oshi: { slug: string }) => ({
+    oshiSlug: oshi.slug,
+  }));
 }
 
 export default async function OshiPage({ params }: OshiPageProps) {

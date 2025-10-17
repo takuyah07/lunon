@@ -1,12 +1,19 @@
 /**
  * /stores/[storeSlug] - 店舗ページ
  * 在籍推し一覧 + 今月のランキング表示
+ * 
+ * パフォーマンス最適化:
+ * - ISR: 5分毎に再検証
+ * - 静的生成: ビルド時に全店舗ページを生成
  */
 
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import OshiCard from "@/components/OshiCard";
 import RankingList from "@/components/RankingList";
+
+// ISR: 5分毎に再検証
+export const revalidate = 300;
 
 interface StorePageProps {
   params: {
@@ -41,7 +48,7 @@ async function getRankingData(storeId: string) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     const response = await fetch(
       `${siteUrl}/api/stores/${storeId}/ranking`,
-      { cache: "no-store" }
+      { next: { revalidate: 300 } } // 5分キャッシュ
     );
 
     if (!response.ok) {
@@ -53,6 +60,18 @@ async function getRankingData(storeId: string) {
     console.error("Failed to fetch ranking:", error);
     return { month: "", items: [] };
   }
+}
+
+// 静的パス生成: 全店舗ページをビルド時に生成
+export async function generateStaticParams() {
+  const stores = await prisma.store.findMany({
+    where: { isPublic: true },
+    select: { slug: true },
+  });
+
+  return stores.map((store: { slug: string }) => ({
+    storeSlug: store.slug,
+  }));
 }
 
 export default async function StorePage({ params }: StorePageProps) {
