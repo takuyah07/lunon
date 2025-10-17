@@ -26,6 +26,16 @@ if (IS_DRY_RUN) {
   console.warn("[Square] DRY RUN mode enabled - Square API calls will be skipped");
 }
 
+// デバッグ情報を出力
+console.log("[Square] Configuration:", {
+  isDryRun: IS_DRY_RUN,
+  environment: process.env.SQUARE_ENV,
+  hasAccessToken: !!process.env.SQUARE_ACCESS_TOKEN,
+  accessTokenPrefix: process.env.SQUARE_ACCESS_TOKEN?.substring(0, 6),
+  locationId: SQUARE_LOCATION_ID,
+  applicationId: SQUARE_APPLICATION_ID,
+});
+
 /**
  * Squareクライアントのシングルトンインスタンス
  * DRY RUNモードの場合はnull
