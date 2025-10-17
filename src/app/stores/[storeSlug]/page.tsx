@@ -14,6 +14,14 @@ interface StorePageProps {
   };
 }
 
+interface OshiData {
+  id: string;
+  name: string;
+  slug: string;
+  photoUrl: string | null;
+  profileShort: string | null;
+}
+
 async function getStoreData(slug: string) {
   const store = await prisma.store.findUnique({
     where: { slug, isPublic: true },
@@ -109,7 +117,7 @@ export default async function StorePage({ params }: StorePageProps) {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-                {store.oshis.map((oshi: any) => (
+                {store.oshis.map((oshi: OshiData) => (
                   <OshiCard
                     key={oshi.id}
                     slug={oshi.slug}
