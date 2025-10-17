@@ -182,6 +182,7 @@ export async function updateMonthlyRankingCache(): Promise<number> {
   }
 
   // 更新された店舗の一覧を取得
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updatedStores = new Set(aggregations.map((a: any) => a.storeId));
 
   console.log(`[Ranking] Updated ${updatedStores.size} stores`);

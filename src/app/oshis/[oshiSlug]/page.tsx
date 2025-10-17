@@ -14,6 +14,12 @@ interface OshiPageProps {
   };
 }
 
+interface PresetData {
+  id: string;
+  label: string;
+  amount: number;
+}
+
 async function getOshiData(slug: string) {
   const oshi = await prisma.oshi.findUnique({
     where: { slug, isActive: true },
@@ -105,7 +111,7 @@ export default async function OshiPage({ params }: OshiPageProps) {
               </div>
             ) : (
               <div className="space-y-3">
-                {oshi.presets.map((preset: any) => (
+                {oshi.presets.map((preset: PresetData) => (
                   <GiftButton
                     key={preset.id}
                     oshiId={oshi.id}

@@ -38,7 +38,7 @@ export const squareClient = IS_DRY_RUN
   ? null 
   : new Client({
       accessToken: SQUARE_ACCESS_TOKEN,
-      environment: SQUARE_ENV as any,
+      environment: SQUARE_ENV as "production" | "sandbox",
     });
 
 /**
@@ -142,8 +142,10 @@ export async function listPayments(
       return [];
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return result.payments
       .filter((p: any) => p.status === "COMPLETED") // 成功した決済のみ
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((payment: any) => ({
         id: payment.id!,
         amount: payment.amountMoney?.amount || BigInt(0),

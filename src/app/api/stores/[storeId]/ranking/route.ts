@@ -14,6 +14,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { formatMonthYmJst } from "@/lib/time";
 
+interface RankingData {
+  oshiId: string;
+  totalAmount: number;
+  oshi: {
+    id: string;
+    name: string;
+    photoUrl: string | null;
+    slug: string;
+  };
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { storeId: string } }
@@ -47,7 +58,7 @@ export async function GET(
     });
 
     // ランキング形式に変換
-    const items = rankings.map((ranking: any, index: number) => ({
+    const items = rankings.map((ranking: RankingData, index: number) => ({
       rank: index + 1,
       oshiId: ranking.oshiId,
       name: ranking.oshi.name,
