@@ -1,6 +1,10 @@
 /**
  * GiftButton - ギフト送信ボタンコンポーネント
  * 推し詳細ページで使用
+ * 
+ * パフォーマンス最適化:
+ * - paymentLinkUrlがある場合：<a>タグで即座に遷移（超高速）
+ * - ない場合：API経由で生成（初回のみ）
  */
 
 "use client";
@@ -12,6 +16,7 @@ interface GiftButtonProps {
   presetId: string;
   label: string;
   amount: number;
+  paymentLinkUrl: string | null;
 }
 
 export default function GiftButton({
@@ -19,9 +24,26 @@ export default function GiftButton({
   presetId,
   label,
   amount,
+  paymentLinkUrl,
 }: GiftButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
+  // ✨ キャッシュがある場合：<a>タグで直接遷移（超高速）
+  if (paymentLinkUrl) {
+    return (
+      <a
+        href={paymentLinkUrl}
+        className="group relative block w-full overflow-hidden rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-4 font-bold text-white text-center shadow-lg transition-all hover:from-pink-600 hover:to-purple-700 hover:shadow-xl"
+      >
+        <span className="flex items-center justify-center gap-2">
+          <span>{label}</span>
+          <span className="text-xl">¥{amount.toLocaleString()}</span>
+        </span>
+      </a>
+    );
+  }
+
+  // キャッシュがない場合：API経由で生成（初回のみ）
   const handleClick = async () => {
     if (isLoading) return;
 

@@ -25,6 +25,7 @@ interface PresetData {
   id: string;
   label: string;
   amount: number;
+  paymentLinkUrl: string | null;
 }
 
 async function getOshiData(slug: string) {
@@ -137,6 +138,7 @@ export default async function OshiPage({ params }: OshiPageProps) {
                     presetId={preset.id}
                     label={preset.label}
                     amount={preset.amount}
+                    paymentLinkUrl={preset.paymentLinkUrl}
                   />
                 ))}
               </div>
