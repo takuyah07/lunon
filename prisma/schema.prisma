@@ -36,13 +36,16 @@ model Oshi {
 }
 
 model GiftPreset {
-  id                  String  @id @default(cuid())
+  id                  String   @id @default(cuid())
   oshiId              String
-  oshi                Oshi    @relation(fields: [oshiId], references: [id])
+  oshi                Oshi     @relation(fields: [oshiId], references: [id])
   label               String
   amount              Int
   squareCatalogItemId String
-  isActive            Boolean @default(true)
+  paymentLinkUrl      String?  // 事前生成したPayment Link（キャッシュ）
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 model Payment {

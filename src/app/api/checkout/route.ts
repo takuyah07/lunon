@@ -1,6 +1,10 @@
 /**
  * POST /api/checkout
- * Square Checkout URL生成API
+ * Square Checkout URL生成API（自動キャッシュ機能付き）
+ * 
+ * パフォーマンス最適化:
+ * - Payment LinkがDBに存在する場合：即座に返す（0.1秒以下）
+ * - 存在しない場合：Square APIで生成してDBに保存（初回のみ）
  * 
  * リクエスト: { oshiId: string, presetId: string }
  * レスポンス: { url: string } | { error: string }
@@ -52,8 +56,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Square Checkout URL生成
+    // ✨ キャッシュチェック: Payment Linkが既に存在する場合は即座に返す
+    if (preset.paymentLinkUrl) {
+      return NextResponse.json({ url: preset.paymentLinkUrl });
+    }
+
+    // Payment Linkが存在しない場合: Square APIで生成
     const checkoutUrl = await createCheckoutUrl(preset.squareCatalogItemId);
+
+    // ✨ DBに保存（次回から高速化）
+    await prisma.giftPreset.update({
+      where: { id: presetId },
+      data: { paymentLinkUrl: checkoutUrl },
+    });
 
     return NextResponse.json({ url: checkoutUrl });
   } catch (error) {
