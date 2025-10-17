@@ -27,45 +27,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // GiftPreset取得
-    const preset = await prisma.giftPreset.findUnique({
-      where: { id: presetId },
-      include: { oshi: true },
+    // 推し情報取得
+    const oshi = await prisma.oshi.findUnique({
+      where: { id: oshiId },
+      include: {
+        store: {
+          include: {
+            giftTemplates: true,
+          },
+        },
+      },
     });
 
-    if (!preset) {
+    if (!oshi) {
       return NextResponse.json(
-        { error: "Gift preset not found" },
+        { error: "Oshi not found" },
         { status: 404 }
       );
     }
 
-    // 推しIDが一致するか確認
-    if (preset.oshiId !== oshiId) {
+    // ✨ 店舗の共通テンプレートを取得
+    const template = await prisma.storeGiftTemplate.findUnique({
+      where: { id: presetId },
+    });
+
+    if (!template) {
       return NextResponse.json(
-        { error: "Invalid oshiId for this preset" },
+        { error: "Gift template not found" },
+        { status: 404 }
+      );
+    }
+
+    // 店舗IDが一致するか確認
+    if (template.storeId !== oshi.storeId) {
+      return NextResponse.json(
+        { error: "Invalid template for this oshi" },
         { status: 400 }
       );
     }
 
-    // プリセットが有効か確認
-    if (!preset.isActive) {
+    // テンプレートが有効か確認
+    if (!template.isActive) {
       return NextResponse.json(
-        { error: "This gift preset is not active" },
+        { error: "This gift template is not active" },
         { status: 400 }
       );
     }
 
     // ✨ キャッシュチェック: Payment Linkが既に存在する場合は即座に返す
-    if (preset.paymentLinkUrl) {
-      return NextResponse.json({ url: preset.paymentLinkUrl });
+    if (template.paymentLinkUrl) {
+      return NextResponse.json({ url: template.paymentLinkUrl });
     }
 
     // Payment Linkが存在しない場合: Square APIで生成
-    const checkoutUrl = await createCheckoutUrl(preset.squareCatalogItemId);
+    const checkoutUrl = await createCheckoutUrl(template.squareCatalogItemId);
 
     // ✨ DBに保存（次回から高速化）
-    await prisma.giftPreset.update({
+    await prisma.storeGiftTemplate.update({
       where: { id: presetId },
       data: { paymentLinkUrl: checkoutUrl },
     });

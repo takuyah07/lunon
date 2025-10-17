@@ -32,7 +32,14 @@ async function getOshiData(slug: string) {
   const oshi = await prisma.oshi.findUnique({
     where: { slug, isActive: true },
     include: {
-      store: true,
+      store: {
+        include: {
+          giftTemplates: {
+            where: { isActive: true },
+            orderBy: { displayOrder: "asc" },
+          },
+        },
+      },
       presets: {
         where: { isActive: true },
         orderBy: { amount: "asc" },
@@ -123,26 +130,35 @@ export default async function OshiPage({ params }: OshiPageProps) {
               ギフトを送る
             </h2>
             
-            {oshi.presets.length === 0 ? (
-              <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-                <p className="text-gray-500">
-                  現在、ギフトプリセットが設定されていません
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {oshi.presets.map((preset: PresetData) => (
-                  <GiftButton
-                    key={preset.id}
-                    oshiId={oshi.id}
-                    presetId={preset.id}
-                    label={preset.label}
-                    amount={preset.amount}
-                    paymentLinkUrl={preset.paymentLinkUrl}
-                  />
-                ))}
-              </div>
-            )}
+            {(() => {
+              // 店舗の共通テンプレートを優先使用
+              const templates = oshi.store.giftTemplates;
+              
+              if (templates.length === 0) {
+                return (
+                  <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+                    <p className="text-gray-500">
+                      現在、ギフトが設定されていません
+                    </p>
+                  </div>
+                );
+              }
+              
+              return (
+                <div className="space-y-3">
+                  {templates.map((template: any) => (
+                    <GiftButton
+                      key={template.id}
+                      oshiId={oshi.id}
+                      presetId={template.id}
+                      label={template.label}
+                      amount={template.amount}
+                      paymentLinkUrl={template.paymentLinkUrl}
+                    />
+                  ))}
+                </div>
+              );
+            })()}
 
             <p className="mt-6 text-center text-xs text-rose-600">
               ※Square決済画面に遷移します

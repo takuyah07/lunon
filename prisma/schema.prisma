@@ -25,9 +25,10 @@ model Store {
   logoUrl     String?
   bannerUrl   String?
   
-  createdAt   DateTime @default(now())
-  oshis       Oshi[]
-  payments    Payment[]
+  createdAt      DateTime            @default(now())
+  oshis          Oshi[]
+  payments       Payment[]
+  giftTemplates  StoreGiftTemplate[] // 店舗共通ギフトテンプレート
 }
 
 model Oshi {
@@ -84,4 +85,21 @@ model MonthlyRankCache {
 
   @@unique([storeId, oshiId, monthYm])
   @@index([storeId, monthYm, totalAmount])
+}
+
+// 店舗レベルの共通ギフトテンプレート
+model StoreGiftTemplate {
+  id                  String   @id @default(cuid())
+  storeId             String
+  store               Store    @relation(fields: [storeId], references: [id])
+  label               String
+  amount              Int
+  squareCatalogItemId String
+  paymentLinkUrl      String?  // キャッシュされたPayment Link
+  displayOrder        Int      @default(0)
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([storeId, displayOrder])
 }
