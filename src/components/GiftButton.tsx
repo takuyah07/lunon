@@ -9,7 +9,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface GiftButtonProps {
   oshiId: string;
@@ -27,6 +27,21 @@ export default function GiftButton({
   paymentLinkUrl,
 }: GiftButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+
+  // ブラウザバック時にローディング状態をリセット
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setIsLoading(false);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   // ✨ キャッシュがある場合：<a>タグで直接遷移（超高速）
   if (paymentLinkUrl) {
