@@ -64,21 +64,6 @@ export async function createCheckoutUrl(
   try {
     const response = await squareClient.checkout.paymentLinks.create({
       idempotencyKey: `${catalogItemId}-${Date.now()}`,
-      quickPay: {
-        name: "ギフト",
-        priceMoney: {
-          amount: BigInt(0), // Catalog価格を使用
-          currency: "JPY",
-        },
-        locationId: SQUARE_LOCATION_ID,
-      },
-      checkoutOptions: {
-        redirectUrl: `${SITE_URL}/stores`,
-        // askForShippingAddress: false, // 配送不要
-      },
-      prePopulatedData: {
-        buyerEmail: undefined, // ゲストチェックアウト
-      },
       order: {
         locationId: SQUARE_LOCATION_ID,
         lineItems: [
@@ -87,6 +72,9 @@ export async function createCheckoutUrl(
             quantity: quantity.toString(),
           },
         ],
+      },
+      checkoutOptions: {
+        redirectUrl: `${SITE_URL}/stores`,
       },
     });
 
