@@ -15,6 +15,16 @@ model Store {
   addressText String?
   hoursText   String?
   isPublic    Boolean  @default(true)
+  
+  // テーマカラー（カスタマイズ可能）
+  themePrimary   String @default("#ec4899")  // ピンク
+  themeSecondary String @default("#a855f7")  // パープル
+  themeAccent    String @default("#f43f5e")  // ローズ
+  
+  // デザイン設定
+  logoUrl     String?
+  bannerUrl   String?
+  
   createdAt   DateTime @default(now())
   oshis       Oshi[]
   payments    Payment[]

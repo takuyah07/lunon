@@ -84,8 +84,15 @@ export default async function StorePage({ params }: StorePageProps) {
 
   const ranking = await getRankingData(store.id);
 
+  // テーマカラーをCSS変数として適用
+  const themeStyle = {
+    '--theme-primary': store.themePrimary || '#ec4899',
+    '--theme-secondary': store.themeSecondary || '#a855f7',
+    '--theme-accent': store.themeAccent || '#f43f5e',
+  } as React.CSSProperties;
+
   return (
-    <div className="min-h-screen bg-rose-50">
+    <div className="min-h-screen bg-rose-50" style={themeStyle}>
       {/* ヘッダー */}
       <header className="relative overflow-hidden border-b border-rose-200 bg-rose-100 shadow-lg">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyb3NlIiBzdHJva2Utb3BhY2l0eT0iMC4xIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-10" />
